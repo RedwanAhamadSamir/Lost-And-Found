@@ -1,0 +1,14 @@
+{% if not user.is_admin %}
+<div class="response-section">
+    {% if not item.responses.filter(user=user).exists %}
+    <form action="{% url 'responses:create' item.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="response-btn">This is mine!</button>
+    </form>
+    {% else %}
+    <p class="responded">You've claimed this item</p>
+    {% endif %}
+    
+    <p class="response-count">{{ item.responses.count }} responses</p>
+</div>
+{% endif %}

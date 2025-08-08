@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/report_lost.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="lost-item-container">
+    <div class="particles-bg" id="particles-js"></div>
+    
+    <div class="glass-card">
+        <div class="card-header">
+            <h2><i class="fas fa-search-location"></i> Report Lost Item</h2>
+            <div class="pulse-animation"></div>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="lost-item-form">
+            {% csrf_token %}
+            
+            <div class="form-group floating-input">
+                <input type="text" id="id_title" name="title" required>
+                <label for="id_title">Item Title</label>
+                <div class="icon"><i class="fas fa-tag"></i></div>
+                <span class="highlight"></span>
+                <div class="hint">What did you lose? (e.g. Black Wallet, iPhone 13)</div>
+            </div>
+            
+            <div class="form-group floating-input">
+                <textarea id="id_description" name="description" required></textarea>
+                <label for="id_description">Description</label>
+                <div class="icon"><i class="fas fa-align-left"></i></div>
+                <span class="highlight"></span>
+                <div class="hint">Where/when you lost it, distinctive features</div>
+            </div>
+            
+            <div class="form-group file-upload">
+                <input type="file" id="id_image" name="image" accept="image/*">
+                <label for="id_image" class="upload-label">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span class="upload-text">Upload Image (Optional)</span>
+                    <span class="file-name">No file chosen</span>
+                </label>
+                <div class="preview-container"></div>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <span class="btn-text">Report Lost Item</span>
+                <span class="btn-icon"><i class="fas fa-paper-plane"></i></span>
+                <div class="liquid-effect"></div>
+            </button>
+        </form>
+    </div>
+    
+    <div class="floating-elements">
+        <div class="float-circle circle-1"></div>
+        <div class="float-circle circle-2"></div>
+        <div class="float-circle circle-3"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/particles.min.js' %}"></script>
+<script src="{% static 'js/report_lost.js' %}"></script>
+{% endblock %}

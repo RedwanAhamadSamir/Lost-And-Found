@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/signup.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container glassmorphism">
+    <div class="auth-header">
+        <h2 class="auth-title">Sign Up with Your ID</h2>
+        <div class="decorative-circle circle-1"></div>
+        <div class="decorative-circle circle-2"></div>
+    </div>
+    
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        <div class="form-group floating-input">
+            {{ form.user_id }}
+            <label for="{{ form.user_id.id_for_label }}">Your Institution ID</label>
+            <span class="highlight"></span>
+            <small class="form-hint">Use your institution ID</small>
+        </div>
+        
+        <div class="form-group floating-input">
+            {{ form.email }}
+            <label for="{{ form.email.id_for_label }}">Email Address</label>
+            <span class="highlight"></span>
+        </div>
+        
+        <div class="form-group floating-input">
+            {{ form.password1 }}
+            <label for="{{ form.password1.id_for_label }}">Password</label>
+            <span class="highlight"></span>
+        </div>
+        
+        <div class="form-group floating-input">
+            {{ form.password2 }}
+            <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+            <span class="highlight"></span>
+        </div>
+        
+        <button type="submit" class="btn btn-primary neumorphism-btn">
+            <span class="btn-text">Sign Up</span>
+            <span class="btn-icon">→</span>
+        </button>
+    </form>
+    
+    <p class="auth-footer">Already have an account? 
+        <a href="{% url 'accounts:login' %}" class="auth-link">Login</a>
+    </p>
+    
+    <div class="particles-container" id="particles-js"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/particles.min.js' %}"></script>
+<script src="{% static 'js/signup.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lost_items.css' %}">
+<style>
+    /* New CSS for reporter info only */
+    .meta-reporter {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .meta-reporter i {
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lost-items-container">
+    <h2 class="lost-items-title glassmorphism">Lost Items Timeline</h2>
+    
+    <div class="lost-items-grid">
+        {% for item in lost_items %}
+        <div class="lost-item-card neumorphism-card" data-aos="fade-up">
+            <div class="card-header">
+                <h3 class="card-title">{{ item.title }}</h3>
+                <div class="status-indicator {% if item.found %}found{% else %}not-found{% endif %}">
+                    {% if item.found %}Found{% else %}Not Found{% endif %}
+                </div>
+            </div>
+            <div class="card-content">
+                <p class="card-description">{{ item.description }}</p>
+                <div class="card-meta">
+                    <span class="meta-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ item.date_reported|date:"M d, Y" }}
+                    </span>
+                    <span class="meta-reporter">
+                        <i class="fas fa-user"></i>
+                        Reported by: {{ item.reported_by.user_id }}
+                    </span>
+                    {% if item.location %}
+                    <span class="meta-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ item.location }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="card-btn update-btn">
+                    <i class="fas fa-edit"></i> Update
+                </button>
+                <button class="card-btn details-btn">
+                    <i class="fas fa-info-circle"></i> Details
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script src="{% static 'js/lost_items.js' %}"></script>
+{% endblock %}

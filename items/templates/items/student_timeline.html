@@ -1,0 +1,496 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* Background Gradient */
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    /* Main Container */
+    .student-items-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Glass Title */
+    .student-items-title {
+        font-size: 2.2rem;
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 20px 40px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 
+            0 10px 35px rgba(0, 0, 0, 0.1),
+            inset 0 0 25px rgba(255, 255, 255, 0.3);
+        color: #2c3e50;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .student-items-title::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            to bottom right,
+            rgba(255, 255, 255, 0.4) 0%,
+            rgba(255, 255, 255, 0) 60%
+        );
+        transform: rotate(30deg);
+        pointer-events: none;
+    }
+
+    /* Ultra Glossy Glass Card Grid */
+    .student-items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 30px;
+        padding: 10px;
+    }
+
+    /* Premium Glass Card */
+    .student-item-card {
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: relative;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 
+            0 15px 35px rgba(0, 0, 0, 0.1),
+            inset 0 0 30px rgba(255, 255, 255, 0.2);
+        padding: 25px;
+        z-index: 1;
+    }
+
+    .student-item-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        border-radius: 20px;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .student-item-card::after {
+        content: '';
+        position: absolute;
+        top: -100%;
+        left: -100%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            to bottom right,
+            rgba(255, 255, 255, 0.5) 0%,
+            rgba(255, 255, 255, 0) 50%
+        );
+        transform: rotate(30deg);
+        transition: all 0.8s ease;
+        opacity: 0;
+    }
+
+    .student-item-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 
+            0 25px 60px rgba(0, 0, 0, 0.2),
+            inset 0 0 40px rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .student-item-card:hover::after {
+        opacity: 1;
+        left: 100%;
+        top: 100%;
+    }
+
+    /* Card Header */
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        margin: 0;
+        color: #2c3e50;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-indicator {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .status-indicator.claimed {
+        color: #27ae60;
+        border: 1px solid rgba(39, 174, 96, 0.4);
+    }
+
+    .status-indicator.not-claimed {
+        color: #e74c3c;
+        border: 1px solid rgba(231, 76, 60, 0.4);
+    }
+
+    /* Card Image */
+    .card-image-container {
+        position: relative;
+        height: 450px;
+        overflow: hidden;
+        margin: 20px 0;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        z-index: 2;
+    }
+
+    .card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+    .card-image:hover {
+        transform: scale(1.05);
+    }
+
+    .card-image-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        pointer-events: none;
+    }
+
+    /* Card Content */
+    .card-content {
+        margin: 25px 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-description {
+        color: #4a5568;
+        margin: 15px 0;
+        line-height: 1.6;
+    }
+
+    .card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 20px 0;
+        font-size: 0.95rem;
+    }
+
+    .meta-date, .meta-reporter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #4a5568;
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(10px);
+        padding: 8px 15px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .meta-date i, .meta-reporter i {
+        color: #4a5568;
+        opacity: 0.8;
+    }
+
+    .response-count {
+        margin: 20px 0;
+        font-size: 1rem;
+        color: #4a5568;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(10px);
+        padding: 10px 15px;
+        border-radius: 50px;
+        display: inline-block;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    /* Response Form */
+    .card-footer {
+        margin-top: 25px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .response-form textarea {
+        width: 100%;
+        padding: 15px;
+        border-radius: 15px;
+        border: none;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(15px);
+        margin-bottom: 15px;
+        resize: vertical;
+        min-height: 100px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        box-shadow: 
+            0 5px 15px rgba(0, 0, 0, 0.05),
+            inset 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .response-form textarea:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 
+            0 0 0 3px rgba(52, 152, 219, 0.3),
+            inset 0 0 15px rgba(255, 255, 255, 0.4);
+    }
+
+    .card-btn {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(52, 152, 219, 0.4);
+        backdrop-filter: blur(15px);
+        color: white;
+        font-size: 1rem;
+        border: 1px solid rgba(52, 152, 219, 0.5);
+        box-shadow: 
+            0 5px 15px rgba(52, 152, 219, 0.1),
+            inset 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .card-btn:hover {
+        background: rgba(52, 152, 219, 0.5);
+        transform: translateY(-3px);
+        box-shadow: 
+            0 8px 25px rgba(52, 152, 219, 0.2),
+            inset 0 0 15px rgba(255, 255, 255, 0.4);
+    }
+
+    .already-responded {
+        color: #27ae60;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        padding: 15px;
+        background: rgba(46, 204, 113, 0.3);
+        border-radius: 15px;
+        border: 1px solid rgba(46, 204, 113, 0.4);
+        backdrop-filter: blur(10px);
+        box-shadow: 
+            0 5px 15px rgba(46, 204, 113, 0.1),
+            inset 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Animate on Scroll */
+    [data-aos] {
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    [data-aos="fade-up"] {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+
+    [data-aos].aos-animate {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .student-items-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .student-items-title {
+            font-size: 1.8rem;
+            padding: 15px 30px;
+        }
+        
+        .card-image-container {
+            height: 200px;
+        }
+        
+        .student-item-card {
+            padding: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .student-items-title {
+            font-size: 1.5rem;
+            padding: 12px 20px;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+        }
+        
+        .card-image-container {
+            height: 180px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="student-items-container">
+    <h2 class="student-items-title" data-aos="fade-up">Found Items Timeline</h2>
+    
+    <div class="student-items-grid">
+        {% for item in items %}
+        <div class="student-item-card" data-aos="fade-up">
+            <div class="card-header">
+                <h3 class="card-title">{{ item.title }}</h3>
+                <div class="status-indicator {% if item.is_claimed %}claimed{% else %}not-claimed{% endif %}">
+                    {% if item.is_claimed %}Claimed{% else %}Not Claimed{% endif %}
+                </div>
+            </div>
+            
+            {% if item.image %}
+            <div class="card-image-container">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" class="card-image">
+            </div>
+            {% endif %}
+            
+            <div class="card-content">
+                <p class="card-description">{{ item.description }}</p>
+                <div class="card-meta">
+                    <span class="meta-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ item.date_found|date:"M d, Y" }}
+                    </span>
+                    <span class="meta-reporter">
+                        <i class="fas fa-user"></i>
+                        Found by ID: {{ item.found_by.id }}
+                    </span>
+                </div>
+                <div class="response-count">
+                    Responses: {{ item.response_count }}
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                {% if not item.user_has_responded %}
+                <form method="post" action="{% url 'responses:create' item.id %}" class="response-form">
+                    {% csrf_token %}
+                    <textarea name="message" placeholder="Describe why you think this is yours..." required></textarea>
+                    <button type="submit" class="card-btn">
+                        <i class="fas fa-paper-plane"></i> Submit Claim
+                    </button>
+                </form>
+                {% else %}
+                <div class="already-responded">
+                    <i class="fas fa-check-circle"></i> Your claim has been submitted
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS animation
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-quart',
+            once: true,
+            offset: 100
+        });
+
+        // Form validation
+        const responseForms = document.querySelectorAll('.response-form');
+        responseForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const textarea = this.querySelector('textarea');
+                if (textarea.value.trim() === '') {
+                    e.preventDefault();
+                    textarea.focus();
+                    textarea.style.boxShadow = '0 0 0 3px rgba(231, 76, 60, 0.3)';
+                    setTimeout(() => {
+                        textarea.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.05)';
+                    }, 2000);
+                }
+            });
+        });
+
+        // Add 3D tilt effect to cards
+        const cards = document.querySelectorAll('.student-item-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const angleX = (y - centerY) / 25;
+                const angleY = (centerX - x) / 25;
+                
+                this.style.transform = `translateY(-10px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

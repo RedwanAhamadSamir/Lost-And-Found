@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+{% block content %}
+<div class="auth-container glassmorphism">
+    <div class="auth-header">
+        <h2 class="auth-title">Login with Your ID</h2>
+        <div class="decorative-circle circle-1"></div>
+        <div class="decorative-circle circle-2"></div>
+    </div>
+    
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        <div class="form-group floating-input">
+            <input type="text" name="username" class="form-control" id="id_username" required placeholder=" ">
+            <label for="id_username">Your ID</label>
+            <span class="highlight"></span>
+        </div>
+        <div class="form-group floating-input">
+            <input type="password" name="password" class="form-control" id="id_password" required placeholder=" ">
+            <label for="id_password">Password</label>
+            <span class="highlight"></span>
+        </div>
+        <button type="submit" class="btn btn-primary neumorphism-btn">
+            <span class="btn-text">Login</span>
+            <span class="btn-icon">→</span>
+        </button>
+    </form>
+    
+    <p class="auth-footer">Don't have an account? 
+        <a href="{% url 'accounts:signup' %}" class="auth-link">Sign Up</a>
+    </p>
+    
+    <div class="particles-container" id="particles-js"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/particles.min.js' %}"></script>
+<script src="{% static 'js/auth.js' %}"></script>
+{% endblock %}
