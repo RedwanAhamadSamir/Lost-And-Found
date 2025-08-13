@@ -7,9 +7,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-z=lz0jl0c1^mebq0u$q#^5*c5mp=q)j@w4zpl&17!)n4n_&mh3'
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',

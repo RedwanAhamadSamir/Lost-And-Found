@@ -1,3 +1,5 @@
+// lost_items.js - Updated without comment functionality
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize AOS (Animate On Scroll)
     AOS.init({

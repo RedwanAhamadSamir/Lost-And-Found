@@ -12,6 +12,9 @@ class Item(models.Model):
     claimed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='claimed_items')
     claim_date = models.DateTimeField(null=True, blank=True)
     
+    class Meta:
+        db_table = 'items_item'  # Explicit table name
+    
     def __str__(self):
         return self.title
     
@@ -23,14 +26,12 @@ class Item(models.Model):
         return self.responses.all().count()
     
     def update_claim_status(self):
-        """Force update claim status if responses exist"""
-        self.refresh_from_db()  # Get latest data
+        self.refresh_from_db()
         if not self.is_claimed and self.responses.exists():
             self.is_claimed = True
             self.claimed_by = self.responses.first().user
             self.claim_date = timezone.now()
             self.save(update_fields=['is_claimed', 'claimed_by', 'claim_date'])
-            print(f"DEBUG: Auto-claimed item {self.id}")  # Verify in logs
 
 class LostItem(models.Model):
     title = models.CharField(max_length=100)
@@ -38,5 +39,22 @@ class LostItem(models.Model):
     date_reported = models.DateTimeField(auto_now_add=True)
     reported_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     
+    class Meta:
+        db_table = 'items_lostitem'  # Explicit table name
+    
     def __str__(self):
         return self.title
+
+class LostItemComment(models.Model):
+    lost_item = models.ForeignKey(LostItem, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    
+    class Meta:
+        db_table = 'items_lostitemcomment'  # Explicit table name
+        ordering = ['created_at']
+    
+    def __str__(self):
+        return f"Comment by {self.user.user_id} on {self.lost_item.title}"

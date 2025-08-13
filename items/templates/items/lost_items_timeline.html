@@ -3,21 +3,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/lost_items.css' %}">
-<style>
-    /* New CSS for reporter info only */
-    .meta-reporter {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin-top: 5px;
-    }
-    
-    .meta-reporter i {
-        color: #6c757d;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/lost_items_comments.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -26,7 +12,7 @@
     
     <div class="lost-items-grid">
         {% for item in lost_items %}
-        <div class="lost-item-card neumorphism-card" data-aos="fade-up">
+        <div class="lost-item-card neumorphism-card" data-aos="fade-up" data-item-id="{{ item.id }}">
             <div class="card-header">
                 <h3 class="card-title">{{ item.title }}</h3>
                 <div class="status-indicator {% if item.found %}found{% else %}not-found{% endif %}">
@@ -53,15 +39,46 @@
                 </div>
             </div>
             <div class="card-footer">
-                <button class="card-btn update-btn">
-                    <i class="fas fa-edit"></i> Update
-                </button>
-                <button class="card-btn details-btn">
-                    <i class="fas fa-info-circle"></i> Details
-                </button>
+                {% if item.reported_by == request.user %}
+                    <!-- Show delete and details for item owner -->
+                    <button class="card-btn delete-btn" onclick="deleteLostItem({{ item.id }})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="card-btn details-btn" onclick="showComments({{ item.id }})">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                {% else %}
+                    <!-- Show only comments for other users -->
+                    <button class="card-btn comments-btn" onclick="showComments({{ item.id }})">
+                        <i class="fas fa-comment"></i> Comments
+                    </button>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
+    </div>
+</div>
+
+<!-- Comments Modal -->
+<div id="commentsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">Comments</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading comments...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Processing...</p>
     </div>
 </div>
 {% endblock %}
@@ -69,4 +86,5 @@
 {% block extra_js %}
 <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script src="{% static 'js/lost_items.js' %}"></script>
+<script src="{% static 'js/lost_items_comments.js' %}"></script>
 {% endblock %}
