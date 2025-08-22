@@ -11,6 +11,9 @@ def signup(request):
             user = form.save()
             # Redirect to login page after signup instead of auto-login
             return redirect('accounts:login')
+        else:
+            # Print form errors to console or log
+            print(form.errors)  # Check your console or server logs
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/signup.html', {'form': form})

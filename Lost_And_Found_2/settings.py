@@ -116,7 +116,15 @@ LOGIN_URL = 'accounts:login'  # URL to redirect to for login
 LOGIN_REDIRECT_URL = 'items:admin_timeline'  # Where to redirect after login
 LOGOUT_REDIRECT_URL = 'accounts:login'  # Where to redirect after logout
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'redwansamir90@gmail.com'  # Replace with your Gmail
+EMAIL_HOST_PASSWORD = 'mogd tahv khqe ibdw'  # Replace with your Gmail app password
+DEFAULT_FROM_EMAIL = 'redwansamir90@gmail.com'  # Replace with your Gmail
+
+# Add this to the rest of your settings
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

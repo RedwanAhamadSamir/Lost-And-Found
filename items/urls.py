@@ -20,4 +20,5 @@ urlpatterns = [
     path('lost-item/delete/<int:item_id>/', views.delete_lost_item, name='delete_lost_item'),
     path('lost-item/comments/<int:item_id>/', views.get_lost_item_comments, name='get_lost_item_comments'),
     path('lost-item/add-comment/<int:item_id>/', views.add_lost_item_comment, name='add_lost_item_comment'),
+    path('admin/reply/<int:response_id>/', views.add_admin_reply, name='add_admin_reply'),
 ]

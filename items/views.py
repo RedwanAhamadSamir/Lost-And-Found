@@ -8,6 +8,11 @@ from responses.models import Response
 from django.contrib import messages
 from django.http import JsonResponse
 import json
+# Add this import at the top if not already present
+from django.core.mail import send_mail
+from django.conf import settings
+
+
 
 @login_required
 def admin_timeline(request):
@@ -145,9 +150,39 @@ def check_item_updates(request, item_id):
         return JsonResponse({'error': 'Permission denied'}, status=403)
     
     item = get_object_or_404(Item, pk=item_id)
+    
+    # Get responses with admin replies
+    responses = Response.objects.filter(item=item).select_related('user')
+    
+    responses_data = []
+    for response in responses:
+        admin_replies = []
+        try:
+            from .models import AdminReply
+            admin_replies = [
+                {
+                    'id': reply.id,
+                    'message': reply.message,
+                    'admin_id': reply.admin.user_id,
+                    'created_at': reply.created_at.strftime('%Y-%m-%d %H:%M')
+                }
+                for reply in AdminReply.objects.filter(response=response)
+            ]
+        except:
+            pass
+        
+        responses_data.append({
+            'id': response.id,
+            'message': response.message,
+            'user_id': response.user.user_id,
+            'created_at': response.response_date.strftime('%Y-%m-%d %H:%M'),
+            'admin_replies': admin_replies
+        })
+    
     return JsonResponse({
         'is_claimed': item.is_claimed,
-        'response_count': item.responses.count()
+        'response_count': item.responses.count(),
+        'responses': responses_data
     })
     
 @login_required
@@ -231,6 +266,118 @@ def add_lost_item_comment(request, item_id):
                 'user_id': comment.user.user_id,
                 'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M'),
                 'is_owner': True
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+    
+
+
+# Add this view function to your existing views.py
+@login_required
+def add_admin_reply(request, response_id):
+    """Add admin reply to a user response"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permission denied'})
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    
+    try:
+        response = get_object_or_404(Response, pk=response_id)
+        
+        data = json.loads(request.body)
+        message = data.get('message', '').strip()
+        
+        if not message:
+            return JsonResponse({'success': False, 'error': 'Reply message cannot be empty'})
+        
+        from .models import AdminReply
+        admin_reply = AdminReply.objects.create(
+            response=response,
+            admin=request.user,
+            message=message
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'reply': {
+                'id': admin_reply.id,
+                'message': admin_reply.message,
+                'admin_id': admin_reply.admin.user_id,
+                'created_at': admin_reply.created_at.strftime('%Y-%m-%d %H:%M')
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+    
+@login_required
+def add_admin_reply(request, response_id):
+    """Add admin reply to a user response and send email notification"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Permission denied'})
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    
+    try:
+        response = get_object_or_404(Response, pk=response_id)
+        
+        data = json.loads(request.body)
+        message = data.get('message', '').strip()
+        user_email = data.get('user_email', '')  # Get user email from request
+        
+        if not message:
+            return JsonResponse({'success': False, 'error': 'Reply message cannot be empty'})
+        
+        from .models import AdminReply
+        admin_reply = AdminReply.objects.create(
+            response=response,
+            admin=request.user,
+            message=message
+        )
+        
+        # Send email notification if user_email is provided
+        if user_email:
+            try:
+                subject = f"Admin Response to Your Inquiry About: {response.item.title}"
+                email_message = f"""
+Hello,
+
+An administrator has responded to your inquiry about the item "{response.item.title}".
+
+Admin Response: {message}
+
+You can view the item and response at: {request.build_absolute_uri(response.item.get_absolute_url())}
+
+Thank you,
+The Lost and Found Team
+"""
+                
+                send_mail(
+                    subject,
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user_email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                # Log the error but don't fail the whole request
+                print(f"Failed to send email notification: {str(e)}")
+        
+        return JsonResponse({
+            'success': True,
+            'reply': {
+                'id': admin_reply.id,
+                'message': admin_reply.message,
+                'admin_id': admin_reply.admin.user_id,
+                'created_at': admin_reply.created_at.strftime('%Y-%m-%d %H:%M')
             }
         })
         

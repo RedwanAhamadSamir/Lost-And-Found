@@ -3,6 +3,36 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+<style>
+    .error-message {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: block;
+    }
+    .field-errors {
+        border-left: 3px solid #e74c3c;
+        padding-left: 10px;
+        margin-bottom: 15px;
+    }
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border: 1px solid #f5c6cb;
+    }
+    .debug-info {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        margin-top: 20px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        display: none; /* Hidden by default, toggle with button */
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -13,38 +43,90 @@
         <div class="decorative-circle circle-2"></div>
     </div>
     
-    <form method="post" class="auth-form">
+    <!-- Form Errors Container (for non-field errors) -->
+    {% if form.errors %}
+    <div class="alert-danger">
+        <strong>Please correct the following errors:</strong>
+        <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" class="auth-form" id="signup-form">
         {% csrf_token %}
-        <div class="form-group floating-input">
+        
+        <!-- User ID Field with Error Handling -->
+        <div class="form-group floating-input {% if form.user_id.errors %}field-errors{% endif %}">
             {{ form.user_id }}
             <label for="{{ form.user_id.id_for_label }}">Your Institution ID</label>
             <span class="highlight"></span>
             <small class="form-hint">Use your institution ID</small>
+            {% if form.user_id.errors %}
+                {% for error in form.user_id.errors %}
+                    <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         
-        <div class="form-group floating-input">
+        <!-- Email Field with Error Handling -->
+        <div class="form-group floating-input {% if form.email.errors %}field-errors{% endif %}">
             {{ form.email }}
             <label for="{{ form.email.id_for_label }}">Email Address</label>
             <span class="highlight"></span>
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         
-        <div class="form-group floating-input">
+        <!-- Password1 Field with Error Handling -->
+        <div class="form-group floating-input {% if form.password1.errors %}field-errors{% endif %}">
             {{ form.password1 }}
             <label for="{{ form.password1.id_for_label }}">Password</label>
             <span class="highlight"></span>
+            {% if form.password1.errors %}
+                {% for error in form.password1.errors %}
+                    <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         
-        <div class="form-group floating-input">
+        <!-- Password2 Field with Error Handling -->
+        <div class="form-group floating-input {% if form.password2.errors %}field-errors{% endif %}">
             {{ form.password2 }}
             <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
             <span class="highlight"></span>
+            {% if form.password2.errors %}
+                {% for error in form.password2.errors %}
+                    <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         
         <button type="submit" class="btn btn-primary neumorphism-btn">
             <span class="btn-text">Sign Up</span>
             <span class="btn-icon">→</span>
         </button>
+
+        <!-- Debug Toggle Button -->
+        <button type="button" id="toggle-debug" class="btn btn-link" style="margin-top: 10px;">
+            Show Debug Info
+        </button>
     </form>
+    
+    <!-- Debug Information Section -->
+    <div class="debug-info" id="debug-info">
+        <h4>Form Data Debug:</h4>
+        <pre id="form-data-debug"></pre>
+        <h4>Form Errors Debug:</h4>
+        <pre id="form-errors-debug">{{ form.errors.as_json }}</pre>
+    </div>
     
     <p class="auth-footer">Already have an account? 
         <a href="{% url 'accounts:login' %}" class="auth-link">Login</a>
@@ -57,4 +139,23 @@
 {% block extra_js %}
 <script src="{% static 'js/particles.min.js' %}"></script>
 <script src="{% static 'js/signup.js' %}"></script>
+<script>
+    // Debug information toggle
+    document.getElementById('toggle-debug').addEventListener('click', function() {
+        const debugInfo = document.getElementById('debug-info');
+        debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+        this.textContent = debugInfo.style.display === 'none' ? 'Show Debug Info' : 'Hide Debug Info';
+    });
+
+    // Capture form data for debugging
+    document.getElementById('signup-form').addEventListener('submit', function(e) {
+        const formData = {};
+        Array.from(this.elements).forEach(element => {
+            if (element.name) {
+                formData[element.name] = element.value;
+            }
+        });
+        document.getElementById('form-data-debug').textContent = JSON.stringify(formData, null, 2);
+    });
+</script>
 {% endblock %}
